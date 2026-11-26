@@ -10,9 +10,9 @@ calendar = Calendar()
 calendar.add("prodid", "-//Kalendarz Strzelecki//")
 calendar.add("version", "2.0")
 
-# =========================
-# PROELIA
-# =========================
+# ==================================
+# ZAWODY KS PROELIA
+# ==================================
 
 URL = "https://ksproelia.pl/zawody"
 
@@ -46,6 +46,8 @@ pattern = r"(\d{1,2})\s+(sty|lut|mar|kwi|maj|cze|lip|sie|wrz|paź|lis|gru)"
 matches = re.findall(pattern, html, re.IGNORECASE)
 
 current_year = datetime.now().year
+
+proelia_count = 0
 added = set()
 
 for day, month_name in matches:
@@ -57,7 +59,7 @@ for day, month_name in matches:
 
     added.add(key)
 
-    dt_start = datetime(
+    event_date = datetime(
         current_year,
         months[month_name.lower()],
         int(day),
@@ -66,24 +68,24 @@ for day, month_name in matches:
     )
 
     event = Event()
-
     event.add(
         "summary",
         f"KS Proelia - {day} {month_name}"
     )
-
-    event.add("dtstart", dt_start)
-    event.add("dtend", dt_start.replace(hour=16))
+    event.add("dtstart", event_date)
+    event.add("dtend", event_date.replace(hour=16))
     event.add("uid", str(uuid.uuid4()))
 
     calendar.add_component(event)
+    proelia_count += 1
 
-# =========================
-# CUSTOM EVENTS
-# =========================
+# ==================================
+# WŁASNE WYDARZENIA Z JSON
+# ==================================
+
+custom_count = 0
 
 try:
-
     with open("custom_events.json", "r", encoding="utf-8") as f:
         custom_events = json.load(f)
 
@@ -104,21 +106,26 @@ try:
         event.add("summary", item["title"])
         event.add("location", item.get("location", ""))
 
+        if item.get("description"):
+            event.add("description", item["description"])
+
         event.add("dtstart", start_dt)
         event.add("dtend", end_dt)
-
         event.add("uid", str(uuid.uuid4()))
 
         calendar.add_component(event)
+        custom_count += 1
 
 except FileNotFoundError:
     print("custom_events.json not found")
 
-# =========================
-# SAVE ICS
-# =========================
+# ==================================
+# ZAPIS PLIKU ICS
+# ==================================
 
 with open("proelia.ics", "wb") as f:
     f.write(calendar.to_ical())
 
-print(f"Generated {len(added)} Proelia events")
+print(f"Generated {proelia_count} Proelia events")
+print(f"Generated {custom_count} custom events")
+print(f"Total events: {proelia_count + custom_count}")
