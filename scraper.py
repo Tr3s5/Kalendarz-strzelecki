@@ -1,5 +1,4 @@
 import requests
-from bs4 import BeautifulSoup
 from icalendar import Calendar, Event
 from datetime import datetime
 import uuid
@@ -7,7 +6,14 @@ import re
 
 URL = "https://ksproelia.pl/zawody"
 
-response = requests.get(URL, timeout=30)
+response = requests.get(
+    URL,
+    timeout=30,
+    headers={
+        "User-Agent": "Mozilla/5.0"
+    }
+)
+
 response.raise_for_status()
 
 html = response.text
@@ -36,6 +42,7 @@ pattern = r"(\d{1,2})(sty|lut|mar|kwi|maj|cze|lip|sie|wrz|paź|lis|gru)"
 matches = re.findall(pattern, html)
 
 current_year = datetime.now().year
+events_count = 0
 
 for day, month_name in matches:
     try:
@@ -54,11 +61,15 @@ for day, month_name in matches:
         event.add("uid", str(uuid.uuid4()))
 
         calendar.add_component(event)
+        events_count += 1
 
     except Exception as e:
-        print(e)
+        print(f"ERROR: {e}")
 
 with open("proelia.ics", "wb") as f:
     f.write(calendar.to_ical())
 
-print(f"Generated {len(matches)} events")
+print("========== DEBUG ==========")
+print(html[:2000])
+print("===========================")
+print(f"Generated {events_count} events")
