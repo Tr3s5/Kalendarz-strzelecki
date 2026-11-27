@@ -12,5 +12,19 @@
     "start": "07:00",
     "end": "11:00",
     "location": "Warszawa"
-  }
+  },
+  {
+    "title": "Wydarzenie zalozone o 10.00 - 27.11",
+    "date": "2027-01-05",
+    "start": "07:00",
+    "end": "11:00",
+    "location": "Warszawa"
+  },
+  {
+    "title": "Wydarzenie zalozone o 10.00 - 27.11",
+    "date": "2027-01-19",
+    "start": "07:00",
+    "end": "11:00",
+    "location": "Warszawa"
+  },
 ]
